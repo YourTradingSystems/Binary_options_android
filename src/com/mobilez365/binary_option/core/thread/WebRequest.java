@@ -7,10 +7,12 @@ import com.mobilez365.binary_option.core.api.ApiWorker;
 import com.mobilez365.binary_option.core.api.ErrorHelper;
 import com.mobilez365.binary_option.core.msg.MsgSender;
 import com.mobilez365.binary_option.screens.chart.BitCoinChart;
+import com.mobilez365.binary_option.screens.chart.TickData;
 import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -92,7 +94,7 @@ public final class WebRequest extends AsyncTask<Bundle, Void, HashMap<Integer, O
 
 
 		if (_result.containsKey(WM_TICK_DATA)) {
-			final TreeMap<Long, BitCoinChart.TickData> ticks = (TreeMap<Long, BitCoinChart.TickData>) _result.get(WM_TICK_DATA);
+			final ArrayList<TickData> ticks = (ArrayList<TickData>) _result.get(WM_TICK_DATA);
 			MsgSender.prepareAndSendMsg_apiTickData(MA_END, ticks);
 
 		} else if (_result.containsKey(M_ERROR)) {

@@ -2,11 +2,13 @@ package com.mobilez365.binary_option.core.api;
 
 import com.mobilez365.binary_option.core.app.DateHelper;
 import com.mobilez365.binary_option.screens.chart.BitCoinChart;
+import com.mobilez365.binary_option.screens.chart.TickData;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 import static com.mobilez365.binary_option.global.Constants.*;
@@ -18,10 +20,10 @@ import static com.mobilez365.binary_option.global.Constants.*;
  */
 abstract class Parser {
 
-	protected static final TreeMap<Long, BitCoinChart.TickData> parseTickData(final String _response)
+	protected static final ArrayList<TickData> parseTickData(final String _response)
 			throws JSONException, ParseException {
 
-		final TreeMap<Long, BitCoinChart.TickData> ticks = new TreeMap<Long, BitCoinChart.TickData>();
+		final ArrayList<TickData> ticks = new ArrayList<TickData>();
 
 		final JSONObject jsonObj = new JSONObject(_response);
 		final String instrument = jsonObj.getString(KEY_INSTRUMENT);
@@ -45,17 +47,15 @@ abstract class Parser {
 			final int volume		= candle.getInt(KEY_VOLUME);
 			final boolean complete	= candle.getBoolean(KEY_COMPLETE);
 
-			final BitCoinChart.TickData tickData
-					= new BitCoinChart.TickData(time
-//					,
-//												openBid,	openAsk,
-//												highBid,	highAsk,
-//												lowBid,		lowAsk,
-//												closeBid,	closeAsk,
-//												volume,		complete
-			);
+			final TickData tickData
+					= new TickData(time,
+												openBid,	openAsk,
+												highBid,	highAsk,
+												lowBid,		lowAsk,
+												closeBid,	closeAsk,
+												volume,		complete);
 
-			ticks.put(time, tickData);
+			ticks.add(tickData);
 		}
 
 		return ticks;

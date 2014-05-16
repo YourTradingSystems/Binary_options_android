@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Message;
 import com.mobilez365.binary_option.screens.chart.BitCoinChart;
+import com.mobilez365.binary_option.screens.chart.TickData;
 
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 import static com.mobilez365.binary_option.global.Constants.*;
@@ -15,17 +17,6 @@ import static com.mobilez365.binary_option.global.Constants.*;
  * Time: 16:48
  */
 public abstract class MsgSender {
-
-	public static final void sendWM_LoginTypes(final Activity _activity, final String _username) {
-		final Bundle bundle = new Bundle();
-//
-//		bundle.putString(KEY_USERNAME,	_username);
-//		bundle.putString(KEY_CHANNEL,	VAL_CHANNEL);
-//		bundle.putString(KEY_BRAND,		VAL_BRAND);
-//
-//		final Message msg = MsgCore.create(WM_LOGIN_TYPES, MA_START);
-//		MsgCore.sendMessage(msg, _activity, bundle);
-	}
 
 	/**
 	 * Prepare and send message for api get tick data.
@@ -46,7 +37,7 @@ public abstract class MsgSender {
 	 * Used for sendint result from web request.
 	 */
 	public static final void prepareAndSendMsg_apiTickData(final int _msgAction,
-														   final TreeMap<Long, BitCoinChart.TickData> _ticks) {
+														   final ArrayList<TickData> _ticks) {
 		final Message msg = MsgCore.create(WM_TICK_DATA, _msgAction);
 		MsgCore.sendMessage(msg, _ticks);
 	}

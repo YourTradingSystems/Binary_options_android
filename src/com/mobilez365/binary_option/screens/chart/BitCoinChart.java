@@ -406,115 +406,27 @@ public final class BitCoinChart extends View {
 	}
 
 	public final void addTickData(final TickData _tickData) {
-		if (mTickDataList != null) mTickDataList.addTickData(_tickData);
+		if (mTickDataList != null) mTickDataList.add(_tickData);
+		invalidate();
+	}
+
+	public final void addTickData(final ArrayList<TickData> _ticks) {
+		if (mTickDataList != null && !_ticks.isEmpty()) {
+			Log.d("tag", "Added " + _ticks.size() + " items. First time: " + DateHelper.getTimeString(_ticks.get(0).getTime()));
+			mTickDataList.addAll(_ticks);
+			Collections.sort(mTickDataList.getList(), new Comparator<TickData>(){
+
+				@Override
+				public final int compare(final TickData _tickData, final TickData _tickData2) {
+					return (int) (_tickData.getTime() - _tickData2.getTime());
+				}
+			});
+		}
+
 		invalidate();
 	}
 
 
-	private final class TickDataList {
-		private ArrayList<Long> mTimes				= null;
-		private ArrayList<Double> mPrices			= null;
 
-		public TickDataList() {
-			mTimes = new ArrayList<Long>();
-			mPrices = new ArrayList<Double>();
-		}
 
-		public final void addTickData(final TickData _tickData) {
-			mTimes.add(_tickData.getTime());
-			mPrices.add(_tickData.getPrice());
-		}
-
-		public final boolean contains(final long _time) {
-			return mTimes.contains(_time);
-		}
-
-		public final int indexOf(final long _time) {
-			return mTimes.indexOf(_time);
-		}
-
-		public final TickData getTickData(final int _pos) {
-			return new TickData(mTimes.get(_pos), mPrices.get(_pos));
-		}
-
-		public final int getCount() {
-			return mTimes.size();
-		}
-	}
-
-	/**
-	 * Class for holding data for one tick: time and prices.
-	 * Time saved in milliseconds (long variable), prices as double.
-	 * And some additional data (not used).
-	 */
-	public static final class TickData {
-		private long mTime = 0;
-		private double mOpenBid			= 0;
-		private double mOpenAsk			= 0;
-		private double mHighBid			= 0;
-		private double mHighAsk			= 0;
-		private double mLowBid			= 0;
-		private double mLowAsk			= 0;
-		private double mCloseBid		= 0;
-		private double mCloseAsk		= 0;
-		private int mVolume				= 0;
-		private boolean mComplete		= false;
-
-		public TickData(final long _time) {
-//				,
-//						final double _openBid,	final double _openAsk,
-//						final double _highBid,	final double _highAsk,
-//						final double _lowBid,	final double _lowAsk,
-//						final double _closeBid,	final double _closeAsk,
-//						final int _volume,		final boolean _complete) {
-
-			mTime = _time;
-//			mOpenBid	= _openBid;
-//			mOpenAsk	= _openAsk;
-//			mHighBid	= _highBid;
-//			mHighAsk	= _highAsk;
-//			mLowBid		= _lowBid;
-//			mLowAsk		= _lowAsk;
-//			mCloseBid	= _closeBid;
-//			mCloseAsk	= _closeAsk;
-//			mVolume		= _volume;
-//			mComplete	= _complete;
-		}
-
-		public TickData(final long _time, final double _openBid) {
-			mTime = _time;
-			mOpenBid = _openBid;
-		}
-
-		/**
-		 * Returns current time in milliseconds.
-		 * @return time in milliseconds.
-		 */
-		public final long getTime() {
-			return mTime;
-		}
-
-		/**
-		 * Returns current price. Change here for another price type.
-		 * @return price.
-		 */
-		public final double getPrice() {
-			return mOpenBid;
-		}
-
-		@Override
-		public final boolean equals(final Object _obj) {
-			if (!(_obj instanceof TickData)) return false;
-
-			final TickData tickData = (TickData) _obj;
-
-			return tickData.getTime() == this.mTime;
-		}
-
-		@Override
-		public final int hashCode() {
-			final int hash = 17 * 7 + this.hashCode() * 17 + (int) mTime;
-			return hash;
-		}
-	}
 }

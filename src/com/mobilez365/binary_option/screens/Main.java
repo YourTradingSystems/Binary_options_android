@@ -16,6 +16,7 @@ import com.mobilez365.binary_option.core.service.WRSBinder;
 import com.mobilez365.binary_option.core.service.WebRequestService;
 import com.mobilez365.binary_option.global.Variables;
 import com.mobilez365.binary_option.screens.chart.BitCoinChart;
+import com.mobilez365.binary_option.screens.chart.TickData;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -74,30 +75,12 @@ public final class Main extends Activity implements View.OnClickListener {
 	@Override
 	public final void onClick(final View _view) {
 
-//		if (!mIsServiceBinded) {
-//			final Intent intent = new Intent(mContext, WebRequestService.class);
-//			mIsServiceBinded = bindService(intent, serviceConnection, BIND_AUTO_CREATE);
-//		} else {
-//			mWrsBinder.getTickData(MA_START);
-//		}
-
-		final ArrayList<BitCoinChart.TickData> mTickDataList = new ArrayList<BitCoinChart.TickData>();
-		final BitCoinChart.TickData d1 = new BitCoinChart.TickData(11);
-		final BitCoinChart.TickData d2 = new BitCoinChart.TickData(22);
-		final BitCoinChart.TickData d3 = new BitCoinChart.TickData(33);
-		final BitCoinChart.TickData d4 = new BitCoinChart.TickData(44);
-		final BitCoinChart.TickData d5 = new BitCoinChart.TickData(55);
-		final BitCoinChart.TickData d6 = new BitCoinChart.TickData(66);
-		mTickDataList.add(d1);
-		mTickDataList.add(d2);
-		mTickDataList.add(d3);
-		mTickDataList.add(d4);
-		mTickDataList.add(d5);
-		mTickDataList.add(d6);
-
-		Log.d("tag_test", "contains: " + mTickDataList.contains(new BitCoinChart.TickData(11)) + ", " + mTickDataList.contains(55) + ", " + mTickDataList.contains(525));
-		Log.d("tag_test", "get: " + mTickDataList.get(1).getTime() + ", " + mTickDataList.get(4).getTime());
-		Log.d("tag_test", "indexOf: " + mTickDataList.indexOf(new BitCoinChart.TickData(33)));
+		if (!mIsServiceBinded) {
+			final Intent intent = new Intent(mContext, WebRequestService.class);
+			mIsServiceBinded = bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+		} else {
+			mWrsBinder.getTickData(MA_START);
+		}
 
 //		Log.d(TAG_SERVICE, "Is binded: " + mIsServiceBinded);
 	}
@@ -117,9 +100,8 @@ public final class Main extends Activity implements View.OnClickListener {
 		}
 	};
 
-	public final void addDataToChart(final TreeMap<Long, BitCoinChart.TickData> _ticks) {
+	public final void addDataToChart(final ArrayList<TickData> _ticks) {
 //		testMethod(25);
-		for (final Map.Entry<Long, BitCoinChart.TickData> tick : _ticks.entrySet())
-			bccChart_SM.addTickData(tick.getValue());
+		bccChart_SM.addTickData(_ticks);
 	}
 }

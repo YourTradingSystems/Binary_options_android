@@ -7,7 +7,9 @@ import com.mobilez365.binary_option.core.api.ResponseWorker;
 import com.mobilez365.binary_option.core.thread.ThreadPool;
 import com.mobilez365.binary_option.core.thread.WebRequest;
 import com.mobilez365.binary_option.screens.chart.BitCoinChart;
+import com.mobilez365.binary_option.screens.chart.TickData;
 
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 import static com.mobilez365.binary_option.global.Constants.*;
@@ -26,7 +28,7 @@ abstract class MsgHandler {
 			ThreadPool.webRequestTask.setMsgCode(WM_TICK_DATA);
 			ThreadPool.webRequestTask.execute(_msg.getData());
 		} else if (action == MA_END) {
-			final TreeMap<Long, BitCoinChart.TickData> ticks = (TreeMap<Long, BitCoinChart.TickData>) _msg.obj;
+			final ArrayList<TickData> ticks = (ArrayList<TickData>) _msg.obj;
 			ResponseWorker.responseApiTickData(ticks);
 		}
 	}

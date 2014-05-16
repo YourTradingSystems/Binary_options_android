@@ -2,6 +2,7 @@ package com.mobilez365.binary_option.core.api;
 
 import android.os.Bundle;
 import com.mobilez365.binary_option.screens.chart.BitCoinChart;
+import com.mobilez365.binary_option.screens.chart.TickData;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
@@ -60,7 +62,7 @@ abstract class ApiHelper {
 
 		final HashMap<Integer, Object> result = new HashMap<Integer, Object>();
 		final String responseStr;
-		final TreeMap<Long, BitCoinChart.TickData> ticks;
+		final ArrayList<TickData> ticks;
 
 		final int statusCode = _conn.getResponseCode();
 		switch (statusCode) {
