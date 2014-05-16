@@ -1,7 +1,7 @@
 package com.mobilez365.binary_option.core.api;
 
+import android.os.Bundle;
 import com.mobilez365.binary_option.core.app.DateHelper;
-import com.mobilez365.binary_option.screens.chart.BitCoinChart;
 import com.mobilez365.binary_option.screens.chart.TickData;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 import static com.mobilez365.binary_option.global.Constants.*;
 
@@ -33,6 +32,7 @@ abstract class Parser {
 
 		for (int i = 0; i < candles.length(); i++) {
 			final JSONObject candle = candles.getJSONObject(i);
+			final Bundle bundle = new Bundle();
 
 			final long time 		= DateHelper.getMillisFromTickDate(candle.getString(KEY_TIME));
 
@@ -47,14 +47,18 @@ abstract class Parser {
 			final int volume		= candle.getInt(KEY_VOLUME);
 			final boolean complete	= candle.getBoolean(KEY_COMPLETE);
 
-			final TickData tickData
-					= new TickData(time,
-												openBid,	openAsk,
-												highBid,	highAsk,
-												lowBid,		lowAsk,
-												closeBid,	closeAsk,
-												volume,		complete);
+			bundle.putDouble(KEY_OPEN_BID, openBid);
+			bundle.putDouble(KEY_OPEN_ASK, openAsk);
+			bundle.putDouble(KEY_HIGH_BID, highBid);
+			bundle.putDouble(KEY_HIGH_ASK, highAsk);
+			bundle.putDouble(KEY_LOW_BID, lowBid);
+			bundle.putDouble(KEY_LOW_ASK, lowAsk);
+			bundle.putDouble(KEY_CLOSE_BID, closeBid);
+			bundle.putDouble(KEY_CLOSE_ASK, closeAsk);
+			bundle.putInt(KEY_VOLUME, volume);
+			bundle.putBoolean(KEY_COMPLETE, complete);
 
+			final TickData tickData = new TickData(time, bundle);
 			ticks.add(tickData);
 		}
 

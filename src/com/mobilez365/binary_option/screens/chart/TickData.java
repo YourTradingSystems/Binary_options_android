@@ -1,5 +1,9 @@
 package com.mobilez365.binary_option.screens.chart;
 
+import android.os.Bundle;
+
+import static com.mobilez365.binary_option.global.Constants.*;
+
 /**
  * Class for holding data for one tick: time and prices.
  * Time saved in milliseconds (long variable), prices as double.
@@ -33,35 +37,21 @@ public final class TickData {
 	/**
 	 * General constructor. Used when parsing data from server.
 	 * @param _time
-	 * @param _openBid
-	 * @param _openAsk
-	 * @param _highBid
-	 * @param _highAsk
-	 * @param _lowBid
-	 * @param _lowAsk
-	 * @param _closeBid
-	 * @param _closeAsk
-	 * @param _volume
-	 * @param _complete
+	 * @param _bundle bundle with other tick data.
 	 */
-	public TickData(final long _time,
-					final double _openBid,	final double _openAsk,
-					final double _highBid,	final double _highAsk,
-					final double _lowBid,	final double _lowAsk,
-					final double _closeBid,	final double _closeAsk,
-					final int _volume,		final boolean _complete) {
+	public TickData(final long _time, final Bundle _bundle) {
 
-		mTime = _time;
-		mOpenBid	= _openBid;
-		mOpenAsk	= _openAsk;
-		mHighBid	= _highBid;
-		mHighAsk	= _highAsk;
-		mLowBid		= _lowBid;
-		mLowAsk		= _lowAsk;
-		mCloseBid	= _closeBid;
-		mCloseAsk	= _closeAsk;
-		mVolume		= _volume;
-		mComplete	= _complete;
+		mTime 		= _time;
+		mOpenBid	= _bundle.getDouble(KEY_OPEN_BID);
+		mOpenAsk	= _bundle.getDouble(KEY_OPEN_ASK);
+		mHighBid	= _bundle.getDouble(KEY_HIGH_BID);
+		mHighAsk	= _bundle.getDouble(KEY_HIGH_ASK);
+		mLowBid		= _bundle.getDouble(KEY_LOW_BID);
+		mLowAsk		= _bundle.getDouble(KEY_LOW_ASK);
+		mCloseBid	= _bundle.getDouble(KEY_CLOSE_BID);
+		mCloseAsk	= _bundle.getDouble(KEY_CLOSE_ASK);
+		mVolume		= _bundle.getInt(KEY_VOLUME);
+		mComplete	= _bundle.getBoolean(KEY_COMPLETE);
 	}
 
 	/**
