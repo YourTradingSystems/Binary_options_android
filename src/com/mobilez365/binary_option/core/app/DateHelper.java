@@ -39,6 +39,6 @@ public abstract class DateHelper {
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT-1"));
 		final Date date = sdf.parse(_tickDate);
 
-		return date.getTime() / 1000;
+		return date.getTime();
 	}
 }

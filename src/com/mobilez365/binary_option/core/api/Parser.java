@@ -34,7 +34,7 @@ abstract class Parser {
 			final JSONObject candle = candles.getJSONObject(i);
 			final Bundle bundle = new Bundle();
 
-			final long time 		= DateHelper.getMillisFromTickDate(candle.getString(KEY_TIME));
+			final long time 		= DateHelper.getMillisFromTickDate(candle.getString(KEY_TIME)) / 1000;
 
 			final double openBid	= candle.getDouble(KEY_OPEN_BID);
 			final double openAsk	= candle.getDouble(KEY_OPEN_ASK);

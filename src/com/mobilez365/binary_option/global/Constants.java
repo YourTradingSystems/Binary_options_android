@@ -11,6 +11,7 @@ public abstract class Constants {
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DEBUG ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	public static final String TAG_SERVICE				= "tag_service";
 	public static final String TAG_MSG					= "tag_msg";
+	public static final String TAG_CHART				= "tag_chart";
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

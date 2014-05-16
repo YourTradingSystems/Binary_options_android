@@ -52,7 +52,7 @@ public final class Main extends Activity implements View.OnClickListener {
 	}
 
 	private final void prepareChart() {
-		bccChart_SM.setTimeInterval(60);
+		bccChart_SM.setTimeInterval(3 * 60);
 		bccChart_SM.setTimeStep(30);
 		bccChart_SM.setStartPos(System.currentTimeMillis() / 1000);
 

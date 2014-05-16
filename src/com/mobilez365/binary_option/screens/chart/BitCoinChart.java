@@ -7,12 +7,16 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 import com.mobilez365.binary_option.core.app.DateHelper;
+import com.mobilez365.binary_option.global.Variables;
 
 import java.util.*;
 
+import static com.mobilez365.binary_option.global.Constants.*;
+
 /**
- * todo: rework to millis
+ * todo: rework to millis when displaying.
  * User: ZOG
  * Date: 30.04.14
  * Time: 16:06
@@ -245,29 +249,47 @@ public final class BitCoinChart extends View {
 		mBottomSpaceHeight = HEIGHT - mGridHeight;
 	}
 
+	/**
+	 * Draws vertical lines on chart every specified time interval.
+	 * Also draws time below the lines.
+	 * @param _canvas Canvas to drawing.
+	 */
 	private final void drawVerticalLinesAndTime(final Canvas _canvas) {
-		long currTimePos = mStartTimePos;
-		while (currTimePos < mStartTimePos + mTimeInterval) {
-			if (currTimePos % mTimeStep == 0) {
-				final float x1 = (currTimePos - mStartTimePos) / (float) mTimeInterval * mGridWidth;
-				final float y1 = 0;
-				final float x2 = x1;
-				final float y2 = mGridHeight;
+		int iterationCount = 0; //debug
 
-				_canvas.drawLine(x1, y1, x2, y2, mGridPaint);
+		//offset to first vertical line (in seconds)
+		final long offset = mTimeStep - (mStartTimePos + mTimeStep) % mTimeStep;
 
-				final float textOffsetY = Math.abs(mTimePaint.ascent() + mTimePaint.descent()) / 2;
-				final float textX = x2;
-				final float textY = y2 + mBottomSpaceHeight / 2 + textOffsetY;
-				final String time = DateHelper.getTimeString(currTimePos * 1000);
-				_canvas.drawText(time, textX, textY, mTimePaint);
-			}
+		//last visible time position on chart
+		final long endTimePos = mStartTimePos + mTimeInterval;
 
-			currTimePos++;
+		//current position: first greater by offset from start pos, than increasing by time step
+		long currTimePos = mStartTimePos + offset;
+		while (currTimePos < endTimePos) {
+			final float x1 = (currTimePos - mStartTimePos) / (float) mTimeInterval * mGridWidth;
+			final float y1 = 0;
+			final float x2 = x1;
+			final float y2 = mGridHeight;
+
+			_canvas.drawLine(x1, y1, x2, y2, mGridPaint);
+
+			final float fontOffsetY = Math.abs(mTimePaint.ascent() + mTimePaint.descent()) / 2;
+			final float textX = x2;
+			final float textY = y2 + mBottomSpaceHeight / 2 + fontOffsetY;
+			final String time = DateHelper.getTimeString(currTimePos * 1000);
+			_canvas.drawText(time, textX, textY, mTimePaint);
+
+			currTimePos += mTimeStep;
+
+			iterationCount++;	//debug
 		}
+
+		Log.d(TAG_CHART, "drawVerticalLinesAndTime, iteration count = " + iterationCount);
 	}
 
 	private final void drawHorizontalLinesAndPrice(final Canvas _canvas) {
+		int iterationCount = 0;	//debug
+
 		checkExtremes();
 
 		final double priceStep = (mMaxPrice - mMinPrice) / mVerticalLinesCount;
@@ -282,12 +304,16 @@ public final class BitCoinChart extends View {
 
 			_canvas.drawLine(x1, y1, x2, y2, mGridPaint);
 
-			final float textOffsetX = mPricePaint.descent();
-			final float textOffsetY = mPricePaint.descent();
-			final float textX = x2 - textOffsetX;
-			final float textY = y2 - textOffsetY;
+			final float fontOffsetX = mPricePaint.descent();
+			final float fontOffsetY = mPricePaint.descent();
+			final float textX = x2 - fontOffsetX;
+			final float textY = y2 - fontOffsetY;
 			_canvas.drawText(String.format("%.6f", currPrice), textX, textY, mPricePaint);
+
+			iterationCount++;	//debug
 		}
+
+		Log.d(TAG_CHART, "drawHorizontalLinesAndPrice, iteration count = " + iterationCount);
 	}
 
 	private double tempMax, tempMin;
@@ -412,7 +438,8 @@ public final class BitCoinChart extends View {
 
 	public final void addTickData(final ArrayList<TickData> _ticks) {
 		if (mTickDataList != null && !_ticks.isEmpty()) {
-			Log.d("tag", "Added " + _ticks.size() + " items. First time: " + DateHelper.getTimeString(_ticks.get(0).getTime()));
+			Toast.makeText(Variables.activity, "Added " + _ticks.size() + " items. First time: "
+					+ DateHelper.getTimeString(_ticks.get(0).getTime() * 1000), Toast.LENGTH_SHORT).show();
 			mTickDataList.addAll(_ticks);
 			Collections.sort(mTickDataList.getList(), new Comparator<TickData>(){
 
