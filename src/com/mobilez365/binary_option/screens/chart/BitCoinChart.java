@@ -7,9 +7,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 import com.mobilez365.binary_option.core.app.DateHelper;
-import com.mobilez365.binary_option.global.Variables;
 
 import java.util.*;
 
@@ -49,14 +47,14 @@ public final class BitCoinChart extends View {
 
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~ Plot Data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	private long mStartTimePos 					= -1;
+	private long mCurrTimePos = -1;
 	private long mTimeStep 						= -1;
 	private long mTimeInterval 					= -1;
 
 	private double mMinPrice					= Integer.MAX_VALUE;
 	private double mMaxPrice					= Integer.MIN_VALUE;
 
-	private TickDataList mTickDataList 			= null;
+//	private TickDataList mTickDataList 			= null;
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	private Path mChartPath 					= null;
@@ -76,19 +74,19 @@ public final class BitCoinChart extends View {
 
 	//region Plot data
 	/**
-	 * Returns start position in seconds.
+	 * Returns curr position in seconds.
 	 * @return time in seconds.
 	 */
-	public final long getStartPos() {
-		return mStartTimePos;
+	public final long getCurrTimePos() {
+		return mCurrTimePos;
 	}
 
 	/**
-	 * Set start position is seconds.
-	 * @param _startPosition time in seconds.
+	 * Set curr position is seconds.
+	 * @param _currPos time in seconds.
 	 */
-	public final void setStartPos(final long _startPosition) {
-		mStartTimePos = _startPosition;
+	public final void setCurrTimePos(final long _currPos) {
+		mCurrTimePos = _currPos;
 	}
 
 	/**
@@ -138,8 +136,6 @@ public final class BitCoinChart extends View {
 		initPricePaint();
 		initPlotStrokePaint();
 		initPlotFillPaint();
-
-		mTickDataList = new TickDataList();
 
 		mChartPath = new Path();
 		mFillPath = new Path();
@@ -199,9 +195,9 @@ public final class BitCoinChart extends View {
 			case MotionEvent.ACTION_MOVE:
 				final float movePos = _event.getRawX();
 				if (movePos < downPos) {
-					incStartPos();
+					incCurrTimePos();
 				} else {
-					decStartPos();
+					decCurrTimePos();
 				}
 				invalidate();
 				break;
@@ -214,12 +210,12 @@ public final class BitCoinChart extends View {
 		return true;
 	}
 
-	public final void incStartPos() {
-		mStartTimePos += 4;
+	public final void incCurrTimePos() {
+		mCurrTimePos += 4;
 	}
 
-	public final void decStartPos() {
-		mStartTimePos -= 4;
+	public final void decCurrTimePos() {
+		mCurrTimePos -= 4;
 	}
 
 	@Override
@@ -237,7 +233,7 @@ public final class BitCoinChart extends View {
 		calcGridSize();
 
 		drawVerticalLinesAndTime(_canvas);
-		drawPlot(_canvas);
+		if (!TickDataList.isEmpty()) drawPlot(_canvas);
 		drawHorizontalLinesAndPrice(_canvas);
 	}
 
@@ -258,15 +254,15 @@ public final class BitCoinChart extends View {
 		int iterationCount = 0; //debug
 
 		//offset to first vertical line (in seconds)
-		final long offset = mTimeStep - (mStartTimePos + mTimeStep) % mTimeStep;
+		final long offset = mTimeStep - (mCurrTimePos + mTimeStep) % mTimeStep;
 
 		//last visible time position on chart
-		final long endTimePos = mStartTimePos + mTimeInterval;
+		final long endTimePos = mCurrTimePos + mTimeInterval;
 
 		//current position: first greater by offset from start pos, than increasing by time step
-		long currTimePos = mStartTimePos + offset;
+		long currTimePos = mCurrTimePos + offset;
 		while (currTimePos < endTimePos) {
-			final float x1 = (currTimePos - mStartTimePos) / (float) mTimeInterval * mGridWidth;
+			final float x1 = (currTimePos - mCurrTimePos) / (float) mTimeInterval * mGridWidth;
 			final float y1 = 0;
 			final float x2 = x1;
 			final float y2 = mGridHeight;
@@ -318,45 +314,20 @@ public final class BitCoinChart extends View {
 
 	private double tempMax, tempMin;
 	private final void drawPlot(final Canvas _canvas) {
-		boolean found = false;
 
-		long firstTimePos = mStartTimePos;
-		for (int i = 0; i < mTimeInterval; i++, firstTimePos++) {
-			if (mTickDataList.contains(firstTimePos)) {
-				found = true;
-				break;
-			}
-		}
+		final ArrayList<TickData> drawList = TickDataList.prepareDataForDraw(this);
 
-		if (!found) return;
-		found = false;
-
-		long lastTimePos = mStartTimePos + mTimeInterval;
-		while (lastTimePos > firstTimePos) {
-			if (mTickDataList.contains(lastTimePos)) {
-				found = true;
-				break;
-			}
-
-			lastTimePos--;
-		}
-
-		if (!found) return;
-
-		final int firstTickPos = mTickDataList.indexOf(firstTimePos);
-		final int lastTickPos = mTickDataList.indexOf(lastTimePos);
-
-		calcExtremes(firstTickPos, lastTickPos);
+		calcExtremes(drawList);
 
 		mChartPath.rewind();
 		mFillPath.rewind();
 
-		for (int i = firstTickPos; i <= lastTickPos; i++) {
-			final TickData tickData = mTickDataList.getTickData(i);
+		for (int i = 0; i < drawList.size(); i++) {
+			final TickData tickData = drawList.get(i);
 			final long time = tickData.getTime();
 			final double price = tickData.getPrice();
 
-			final float x = (time - mStartTimePos) / (float) mTimeInterval * mGridWidth;
+			final float x = (time - mCurrTimePos) / (float) mTimeInterval * mGridWidth;
 			final float y = (float) ((1 - (price - mMinPrice) / (mMaxPrice - mMinPrice)) * mGridHeight);
 
 			//temp: draw lines at max and min value
@@ -382,7 +353,7 @@ public final class BitCoinChart extends View {
 			mFillPath.lineTo(x, y);
 
 			//last point
-			if (i == lastTickPos) mFillPath.lineTo(x, mGridHeight);
+			if (i == drawList.size() - 1) mFillPath.lineTo(x, mGridHeight);
 		}
 
 		if (mChartPath.isEmpty()) return;
@@ -393,10 +364,10 @@ public final class BitCoinChart extends View {
 		_canvas.drawPath(mChartPath, mPlotStrokePaint);
 	}
 
-	private final void calcExtremes(final int _firstTickPos, final int _lastTickPos) {
+	private final void calcExtremes(final ArrayList<TickData> _list) {
 		clearPriceExtremes();
-		for (int i = _firstTickPos; i <= _lastTickPos; i++) {
-			final TickData tickData = mTickDataList.getTickData(i);
+		for (int i = 0; i < _list.size(); i++) {
+			final TickData tickData = _list.get(i);
 			final double price = tickData.getPrice();
 
 			updatePriceExtremes(price);
@@ -408,8 +379,6 @@ public final class BitCoinChart extends View {
 		mMaxPrice += (mMaxPrice - mMinPrice) * 0.1;
 		mMinPrice -= (mMaxPrice - mMinPrice) * 0.1;
 		if (mMinPrice < 0) mMinPrice = 0;
-
-		Log.d("tag", "min price: " + mMinPrice + ", max price: " + mMaxPrice + ", ticks count: " + (_lastTickPos - _firstTickPos));
 	}
 
 	private final void clearPriceExtremes() {
@@ -430,30 +399,5 @@ public final class BitCoinChart extends View {
 			mMaxPrice = 0;
 		}
 	}
-
-	public final void addTickData(final TickData _tickData) {
-		if (mTickDataList != null) mTickDataList.add(_tickData);
-		invalidate();
-	}
-
-	public final void addTickData(final ArrayList<TickData> _ticks) {
-		if (mTickDataList != null && !_ticks.isEmpty()) {
-			Toast.makeText(Variables.activity, "Added " + _ticks.size() + " items. First time: "
-					+ DateHelper.getTimeString(_ticks.get(0).getTime() * 1000), Toast.LENGTH_SHORT).show();
-			mTickDataList.addAll(_ticks);
-			Collections.sort(mTickDataList.getList(), new Comparator<TickData>(){
-
-				@Override
-				public final int compare(final TickData _tickData, final TickData _tickData2) {
-					return (int) (_tickData.getTime() - _tickData2.getTime());
-				}
-			});
-		}
-
-		invalidate();
-	}
-
-
-
 
 }

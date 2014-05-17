@@ -11,17 +11,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 import com.mobilez365.binary_option.R;
-import com.mobilez365.binary_option.core.msg.MsgCore;
 import com.mobilez365.binary_option.core.service.WRSBinder;
 import com.mobilez365.binary_option.core.service.WebRequestService;
 import com.mobilez365.binary_option.global.Variables;
 import com.mobilez365.binary_option.screens.chart.BitCoinChart;
 import com.mobilez365.binary_option.screens.chart.TickData;
+import com.mobilez365.binary_option.screens.chart.TickDataList;
 
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 
 import static com.mobilez365.binary_option.global.Constants.*;
 
@@ -54,7 +51,7 @@ public final class Main extends Activity implements View.OnClickListener {
 	private final void prepareChart() {
 		bccChart_SM.setTimeInterval(3 * 60);
 		bccChart_SM.setTimeStep(30);
-		bccChart_SM.setStartPos(System.currentTimeMillis() / 1000);
+		bccChart_SM.setCurrTimePos(System.currentTimeMillis() / 1000);
 
 		bccChart_SM.setVerticalLinesCount(6);
 	}
@@ -102,6 +99,7 @@ public final class Main extends Activity implements View.OnClickListener {
 
 	public final void addDataToChart(final ArrayList<TickData> _ticks) {
 //		testMethod(25);
-		bccChart_SM.addTickData(_ticks);
+		TickDataList.addAll(_ticks);
+		bccChart_SM.invalidate();
 	}
 }
