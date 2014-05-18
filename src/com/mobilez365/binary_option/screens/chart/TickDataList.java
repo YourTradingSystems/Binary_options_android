@@ -105,10 +105,9 @@ public abstract class TickDataList {
 		return mTickDatas.isEmpty();
 	}
 
-	//todo: probably need sorting here
 	private static final ArrayList<TickData> getSubList(final int _start, final int _end) {
 		final ArrayList<TickData> subList = new ArrayList<TickData>();
-		subList.addAll(mTickDatas.subList(_start, _end));
+		subList.addAll(mTickDatas.subList(_start, _end + 1)); // due to exclusive second param
 		return subList;
 	}
 
@@ -128,7 +127,6 @@ public abstract class TickDataList {
 		final long timeInterval = _bitCoinChart.getTimeInterval();
 
 		long lastTimePos = currTimePos + timeInterval;
-		//todo: maybe change to i >= 0
 		for (long i = timeInterval; i > 0; i--, lastTimePos--)
 			if (mTickDatas.contains(new TickData(lastTimePos))) return lastTimePos;
 

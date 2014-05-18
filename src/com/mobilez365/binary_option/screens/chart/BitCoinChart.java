@@ -15,6 +15,7 @@ import static com.mobilez365.binary_option.global.Constants.*;
 
 /**
  * todo: rework to millis when displaying.
+ * todo: bug? added time and point on chart not match (1 element add)
  * User: ZOG
  * Date: 30.04.14
  * Time: 16:06
@@ -53,8 +54,6 @@ public final class BitCoinChart extends View {
 
 	private double mMinPrice					= Integer.MAX_VALUE;
 	private double mMaxPrice					= Integer.MIN_VALUE;
-
-//	private TickDataList mTickDataList 			= null;
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	private Path mChartPath 					= null;
