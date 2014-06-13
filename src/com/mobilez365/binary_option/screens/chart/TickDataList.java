@@ -16,15 +16,15 @@ import java.util.Comparator;
  * Date: 16.05.14
  * Time: 11:54
  */
-public abstract class TickDataList {
+public final class TickDataList {
 
-	private static ArrayList<TickData> mTickDatas = new ArrayList<TickData>();
+	private ArrayList<TickData> mTickDatas = new ArrayList<TickData>();
 
 	/**
 	 * Adds TickData object and sort data.
 	 * @param _tickData TickData object with parameters.
 	 */
-	public static final void add(final TickData _tickData) {
+	public final void add(final TickData _tickData) {
 		if (_tickData == null || mTickDatas == null) return;
 
 		Toast.makeText(Variables.activity, "Added 1 item. Time: "
@@ -43,7 +43,7 @@ public abstract class TickDataList {
 	 * Adds ArrayList of TickData objects and sort.
 	 * @param _ticks ArrayList with TickData objects.
 	 */
-	public static final void addAll(final ArrayList<TickData> _ticks) {
+	public final void addAll(final ArrayList<TickData> _ticks) {
 		if (_ticks.isEmpty() || mTickDatas == null) return;
 
 		Toast.makeText(Variables.activity, "Added " + _ticks.size() + " items. First time: "
@@ -63,7 +63,7 @@ public abstract class TickDataList {
 	 * @param _time Time is seconds.
 	 * @return Boolean.
 	 */
-	public static final boolean contains(final long _time) {
+	public final boolean contains(final long _time) {
 		return mTickDatas.contains(new TickData(_time));
 	}
 
@@ -72,7 +72,7 @@ public abstract class TickDataList {
 	 * @param _time Time in seconds.
 	 * @return Position in list.
 	 */
-	private static final int indexOf(final long _time) {
+	private final int indexOf(final long _time) {
 		return mTickDatas.indexOf(new TickData(_time));
 	}
 
@@ -81,7 +81,7 @@ public abstract class TickDataList {
 	 * @param _pos Position in list.
 	 * @return TickData object.
 	 */
-	public static final TickData getTickData(final int _pos) {
+	public final TickData getTickData(final int _pos) {
 		return mTickDatas.get(_pos);
 	}
 
@@ -89,7 +89,7 @@ public abstract class TickDataList {
 	 * Returns number of TickData objects in list.
 	 * @return Count of objects.
 	 */
-	public static final int getCount() {
+	public final int getCount() {
 		return mTickDatas.size();
 	}
 
@@ -97,21 +97,21 @@ public abstract class TickDataList {
 	 * Returns inner list with objects. Mostly used for sorting procedures.
 	 * @return Inner ArrayList with TickData Objects.
 	 */
-	public static final ArrayList<TickData> getList() {
+	public final ArrayList<TickData> getList() {
 		return mTickDatas;
 	}
 
-	public static final boolean isEmpty() {
+	public final boolean isEmpty() {
 		return mTickDatas.isEmpty();
 	}
 
-	private static final ArrayList<TickData> getSubList(final int _start, final int _end) {
+	private final ArrayList<TickData> getSubList(final int _start, final int _end) {
 		final ArrayList<TickData> subList = new ArrayList<TickData>();
 		subList.addAll(mTickDatas.subList(_start, _end + 1)); // due to exclusive second param
 		return subList;
 	}
 
-	private static final long findFirstTimePos(final BitCoinChart _bitCoinChart) {
+	private final long findFirstTimePos(final BitCoinChart _bitCoinChart) {
 		final long currTimePos = _bitCoinChart.getCurrTimePos();
 		final long timeInterval = _bitCoinChart.getTimeInterval();
 
@@ -122,7 +122,7 @@ public abstract class TickDataList {
 		return -1;
 	}
 
-	private static final long findLastTimePos(final BitCoinChart _bitCoinChart) {
+	private final long findLastTimePos(final BitCoinChart _bitCoinChart) {
 		final long currTimePos = _bitCoinChart.getCurrTimePos();
 		final long timeInterval = _bitCoinChart.getTimeInterval();
 
@@ -133,7 +133,7 @@ public abstract class TickDataList {
 		return -1;
 	}
 
-	public static final ArrayList<TickData> prepareDataForDraw(final BitCoinChart _bitCoinChart) {
+	public final ArrayList<TickData> prepareDataForDraw(final BitCoinChart _bitCoinChart) {
 		final long firstTimePos = findFirstTimePos(_bitCoinChart);
 		final long lastTimePos = findLastTimePos(_bitCoinChart);
 
@@ -145,4 +145,5 @@ public abstract class TickDataList {
 		final ArrayList<TickData> drawList = getSubList(firstTickPos, lastTickPos);
 		return drawList;
 	}
+
 }

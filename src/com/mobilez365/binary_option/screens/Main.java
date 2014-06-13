@@ -65,10 +65,6 @@ public final class Main extends Activity implements View.OnClickListener {
 //		unbindService(serviceConnection);
 	}
 
-	public final void testMethod(final int _info) {
-		Toast.makeText(mContext, "Work " + _info, Toast.LENGTH_SHORT).show();
-	}
-
 	@Override
 	public final void onClick(final View _view) {
 
@@ -97,9 +93,8 @@ public final class Main extends Activity implements View.OnClickListener {
 		}
 	};
 
-	public final void addDataToChart(final ArrayList<TickData> _ticks) {
-//		testMethod(25);
-		TickDataList.addAll(_ticks);
-		bccChart_SM.invalidate();
+	public final void addDataToChart(final ArrayList<TickData> _tickDatas) {
+		bccChart_SM.addNewDatas(_tickDatas);
 	}
+
 }

@@ -24,7 +24,7 @@ public abstract class MsgSender {
 	 */
 	public static final void prepareAndSendMsg_apiTickData(final int _msgAction /* add other data*/) {
 		final Bundle bundle = new Bundle();
-		bundle.putString(URL_TAG_COUNT, "1");
+		bundle.putString(URL_TAG_COUNT, "50");
 		bundle.putString(URL_TAG_INSTRUMENT, "EUR_USD");
 		//put data in bundle
 

@@ -11,9 +11,10 @@ import java.util.TimeZone;
  * Time: 10:39
  */
 public abstract class DateHelper {
+
 	//	f - format
 	private static final String fTimeChart		= "HH:mm:ss";
-	private static final String fTickDate		= "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	private static final String fTickDate		= "yyyy-MM-dd'T'HH:mm:ss";
 
 	/**
 	 * Formats time in milliseconds to string representation.
@@ -31,12 +32,13 @@ public abstract class DateHelper {
 	 * Returns millis from tick date string. Tick date must be in format fTickDate.
 	 * @param _tickDate tick date string.
 	 * @return time in millis.
-	 * @throws ParseException
+	 * @throws ParseException if time str in bad format
 	 */
-	public static final long getMillisFromTickDate(final String _tickDate) throws ParseException {
+	public static final long getMillisFromTickDate(String _tickDate) throws ParseException {
 
 		final SimpleDateFormat sdf = new SimpleDateFormat(fTickDate);
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT-1"));
+		_tickDate = _tickDate.substring(0, _tickDate.lastIndexOf("."));
 		final Date date = sdf.parse(_tickDate);
 
 		return date.getTime();

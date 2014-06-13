@@ -14,8 +14,7 @@ import java.util.*;
 import static com.mobilez365.binary_option.global.Constants.*;
 
 /**
- * todo: rework to millis when displaying.
- * todo: bug? added time and point on chart not match (1 element add)
+ * todo: rework to millis when displaying
  * User: ZOG
  * Date: 30.04.14
  * Time: 16:06
@@ -48,20 +47,19 @@ public final class BitCoinChart extends View {
 
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~ Plot Data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	private long mCurrTimePos = -1;
+	private long mCurrTimePos 					= -1;
 	private long mTimeStep 						= -1;
 	private long mTimeInterval 					= -1;
 
-	private double mMinPrice					= Integer.MAX_VALUE;
-	private double mMaxPrice					= Integer.MIN_VALUE;
+	private PriceExtremesHandler mPriceExtremesHandler		= null;
+	private TickDataList mTickDataList 			= null;
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	private Path mChartPath 					= null;
 	private Path mFillPath 						= null;
 	//endregion
 
-	//Getters and Setters
-	//region View params
+	//region Getters and Setters
 	public final int getVerticalLinesCount() {
 		return mVerticalLinesCount;
 	}
@@ -130,6 +128,9 @@ public final class BitCoinChart extends View {
 	private final void init() {
 		mDensityMultiplier = getResources().getDisplayMetrics().density;
 
+		mPriceExtremesHandler = new PriceExtremesHandler();
+		mTickDataList = new TickDataList();
+
 		initGridPaint();
 		initTimePaint();
 		initPricePaint();
@@ -167,7 +168,7 @@ public final class BitCoinChart extends View {
 	private final void initPlotStrokePaint() {
 		mPlotStrokePaint = new Paint();
 		mPlotStrokePaint.setStyle(Paint.Style.STROKE);
-		mPlotStrokePaint.setColor(Color.parseColor("#006303"));
+		mPlotStrokePaint.setColor(Color.WHITE);
 		mPlotStrokePaint.setStrokeWidth(2);
 		mPlotStrokePaint.setAntiAlias(true);
 		mPlotStrokePaint.setPathEffect(new CornerPathEffect(5));
@@ -176,7 +177,7 @@ public final class BitCoinChart extends View {
 	private final void initPlotFillPaint() {
 		mPlotFillPaint = new Paint();
 		mPlotFillPaint.setStyle(Paint.Style.FILL);
-		mPlotFillPaint.setColor(Color.parseColor("#99A8F0B9"));
+		mPlotFillPaint.setColor(Color.parseColor("#7fffffff"));
 		mPlotFillPaint.setStrokeWidth(2);
 		mPlotFillPaint.setAntiAlias(true);
 		mPlotFillPaint.setPathEffect(new CornerPathEffect(5));
@@ -222,22 +223,28 @@ public final class BitCoinChart extends View {
 		WIDTH = getWidth();
 		HEIGHT = getHeight();
 
+		final int[] colors = { Color.parseColor("#e4e89e"), Color.parseColor("#edbb92"),
+				Color.parseColor("#ba7b6f"), Color.parseColor("#744363") };
+
 		//draw bg
 		final Paint bgPaint = new Paint();
-		bgPaint.setShader(new RadialGradient(WIDTH / 2, HEIGHT / 2, WIDTH * 0.5f,
-				Color.parseColor("#D9FFDA"), Color.parseColor("#19FF21"), Shader.TileMode.MIRROR));
-//		_canvas.drawPaint(bgPaint);
-		_canvas.drawColor(Color.WHITE);
+		bgPaint.setShader(new LinearGradient(WIDTH, 0, WIDTH, HEIGHT,
+				colors, null, Shader.TileMode.CLAMP));
+		_canvas.drawPaint(bgPaint);
+//		_canvas.drawColor(Color.WHITE);
 
 		calcGridSize();
 
 		drawVerticalLinesAndTime(_canvas);
-		if (!TickDataList.isEmpty()) drawPlot(_canvas);
+		if (!mTickDataList.isEmpty()) drawPlot(_canvas);
 		drawHorizontalLinesAndPrice(_canvas);
 	}
 
+	/**
+	 * Calculates displayed grid size on view and bottom space for time.
+	 * todo: add bool variable to calc once
+	 */
 	private final void calcGridSize() {
-		//todo: add bool variable to calc once
 		mGridWidth = WIDTH;
 		mGridHeight = HEIGHT - HEIGHT * SPACE_FOR_TIME;
 
@@ -282,13 +289,17 @@ public final class BitCoinChart extends View {
 		Log.d(TAG_CHART, "drawVerticalLinesAndTime, iteration count = " + iterationCount);
 	}
 
+	/**
+	 * Draws horizontal lines on chart and price below lines.
+	 * @param _canvas Canvas to drawing.
+	 */
 	private final void drawHorizontalLinesAndPrice(final Canvas _canvas) {
 		int iterationCount = 0;	//debug
 
-		checkExtremes();
+		mPriceExtremesHandler.checkExtremes();
 
-		final double priceStep = (mMaxPrice - mMinPrice) / mVerticalLinesCount;
-		double currPrice = mMaxPrice - priceStep;
+		final double priceStep = (mPriceExtremesHandler.getMaxPrice() - mPriceExtremesHandler.getMinPrice()) / mVerticalLinesCount;
+		double currPrice = mPriceExtremesHandler.getMaxPrice() - priceStep;
 
 		final float distBetweenLines = mGridHeight / mVerticalLinesCount;
 		for (int i = 1; i <= mVerticalLinesCount; i++, currPrice -= priceStep) {
@@ -311,33 +322,37 @@ public final class BitCoinChart extends View {
 		Log.d(TAG_CHART, "drawHorizontalLinesAndPrice, iteration count = " + iterationCount);
 	}
 
-	private double tempMax, tempMin;
+	/**
+	 *
+	 * @param _canvas
+	 */
 	private final void drawPlot(final Canvas _canvas) {
+		final ArrayList<TickData> tickDatas = mTickDataList.prepareDataForDraw(this);
 
-		final ArrayList<TickData> drawList = TickDataList.prepareDataForDraw(this);
+		mPriceExtremesHandler.calcPriceExtremes(tickDatas);
 
-		calcExtremes(drawList);
-
+		//clear pathes
 		mChartPath.rewind();
 		mFillPath.rewind();
 
-		for (int i = 0; i < drawList.size(); i++) {
-			final TickData tickData = drawList.get(i);
+		for (int i = 0; i < tickDatas.size(); i++) {
+			final TickData tickData = tickDatas.get(i);
 			final long time = tickData.getTime();
 			final double price = tickData.getPrice();
 
 			final float x = (time - mCurrTimePos) / (float) mTimeInterval * mGridWidth;
-			final float y = (float) ((1 - (price - mMinPrice) / (mMaxPrice - mMinPrice)) * mGridHeight);
+			final float y = (float) ((1 - (price - mPriceExtremesHandler.getMinPrice()) /
+					(mPriceExtremesHandler.getMaxPrice() - mPriceExtremesHandler.getMinPrice())) * mGridHeight);
 
 			//temp: draw lines at max and min value
 			final Paint paint = new Paint();
 			paint.setStrokeWidth(2);
 			paint.setTextSize(13 * mDensityMultiplier);
-			if (price == tempMax) {
+			if (price == mPriceExtremesHandler.getTempMax()) {
 				paint.setColor(Color.BLUE);
 				_canvas.drawLine(0, y, WIDTH, y, paint);
 				_canvas.drawText("max", 10, y - paint.descent(), paint);
-			} else if (price == tempMin) {
+			} else if (price == mPriceExtremesHandler.getTempMin()) {
 				paint.setColor(Color.RED);
 				_canvas.drawLine(0, y, WIDTH, y, paint);
 				_canvas.drawText("min", 10, y - paint.ascent(), paint);
@@ -352,7 +367,7 @@ public final class BitCoinChart extends View {
 			mFillPath.lineTo(x, y);
 
 			//last point
-			if (i == drawList.size() - 1) mFillPath.lineTo(x, mGridHeight);
+			if (i == tickDatas.size() - 1) mFillPath.lineTo(x, mGridHeight);
 		}
 
 		if (mChartPath.isEmpty()) return;
@@ -363,40 +378,9 @@ public final class BitCoinChart extends View {
 		_canvas.drawPath(mChartPath, mPlotStrokePaint);
 	}
 
-	private final void calcExtremes(final ArrayList<TickData> _list) {
-		clearPriceExtremes();
-		for (int i = 0; i < _list.size(); i++) {
-			final TickData tickData = _list.get(i);
-			final double price = tickData.getPrice();
-
-			updatePriceExtremes(price);
-		}
-
-		tempMax = mMaxPrice;
-		tempMin = mMinPrice;
-
-		mMaxPrice += (mMaxPrice - mMinPrice) * 0.1;
-		mMinPrice -= (mMaxPrice - mMinPrice) * 0.1;
-		if (mMinPrice < 0) mMinPrice = 0;
-	}
-
-	private final void clearPriceExtremes() {
-		mMinPrice = Integer.MAX_VALUE;
-		mMaxPrice = Integer.MIN_VALUE;
-	}
-
-	private final void updatePriceExtremes(final double _price) {
-		if (_price > mMaxPrice) mMaxPrice = _price;
-		if (_price < mMinPrice) mMinPrice = _price;
-	}
-
-	private final void checkExtremes() {
-		if (mMinPrice == Integer.MAX_VALUE) {
-			mMinPrice = 0;
-		}
-		if (mMaxPrice == Integer.MIN_VALUE) {
-			mMaxPrice = 0;
-		}
+	public final void addNewDatas(final ArrayList<TickData> _tickDatas) {
+		mTickDataList.addAll(_tickDatas);
+		invalidate();
 	}
 
 }
